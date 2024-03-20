@@ -1,18 +1,28 @@
 import os
 import bcrypt
-from flask import Flask, jsonify, request, session
+from flask import Flask, jsonify, request, session, abort, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import db, User # Import db and User from models.py
+from models import db, User 
+from dotenv import load_dotenv
+from downloadYT import download_yt
+from pytube.exceptions import RegexMatchError, PytubeError
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
-db.init_app(app) # Initialize db with the app
-migrate = Migrate(app, db) # Initialize migrate with the app and db
-CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:5000"}})
+db.init_app(app) 
+migrate = Migrate(app, db) 
+CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
+
+download_location = os.getenv('DOWNLOAD_LOCATION', './downloads')
+if not os.path.exists(download_location):
+    os.makedirs(download_location)
+app.config['DOWNLOAD_LOCATION'] = os.path.abspath(download_location)
 
 class CheckSession(Resource):
     def get(self):
@@ -35,6 +45,7 @@ class Login(Resource):
         data = request.get_json()
         user = User.query.filter_by(username=data.get('username')).first()
         if user and bcrypt.check_password_hash(user.password, data.get('password')):
+            session['user_id'] = user.id
             return jsonify({'message': 'Login Successful', 'user': user.username})
         else:
             return jsonify({'error': 'Login Failed'}), 401
@@ -58,6 +69,32 @@ class Register(Resource):
         db.session.commit()
         return jsonify({'message': 'User created'}), 201
 api.add_resource(Register, '/register')
+
+class DoubleTrouble(Resource):
+    def post(self):
+        data = request.get_json()
+        video_url = data.get('video_url')
+        download_audio = data.get('download_type', 'audio')
+
+        if video_url:
+            try:
+                file_path = download_yt(video_url, app.config['DOWNLOAD_LOCATION'], download_audio=download_audio)
+                filename = os.path.basename(file_path)
+                return jsonify({'filename': filename}), 200
+            except RegexMatchError:
+                return jsonify({'error': 'Invalid YouTube URL'}), 400
+            except PytubeError:
+                return jsonify({'error': 'Invalid YouTube URL'}), 400
+        return jsonify({'error': 'Invalid YouTube URL'}), 400
+api.add_resource(DoubleTrouble, '/doubleTrouble')
+
+class DownloadFile(Resource):
+    def get(self, filename):
+        try:
+            return send_from_directory(app.config['DOWNLOAD_LOCATION'], filename, as_attachment=True)
+        except FileNotFoundError:
+            return jsonify({'error': 'File not found'}), 404
+api.add_resource(DownloadFile, '/download/<filename>')
 
 if __name__ == '__main__':
     app.run(debug=True)

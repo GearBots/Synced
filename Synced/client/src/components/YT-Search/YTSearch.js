@@ -3,8 +3,9 @@ import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, Button, Text, Image, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import {WebView} from 'react-native-webview';
+import * as Clipboard from 'expo-clipboard';
 
-const YTSearch = () => {
+const YTSearch = ({navigation}) => {
    const [searchQuery, setSearchQuery] = useState('');
    const [results, setResults] = useState([]);
    // const [showWeb, setShowWeb] = useState(false);
@@ -23,11 +24,10 @@ const YTSearch = () => {
    setResults(response.data.items);
  };
 
-//  const copyToClipboard = (url) => {
-//    Clipboard.setString(url);
-//    alert('Link copied to clipboard');
-    
-//  }
+ const copyToClipboard = (url) => {
+   Clipboard.setString(url);
+   alert('Link copied to clipboard');
+ }
 
 //  const openVideo = (videoId) => {
 //     const url = `https://www.youtube.com/watch?v=${videoId}`
@@ -43,6 +43,7 @@ const YTSearch = () => {
         value={searchQuery}
         placeholder="Search..."
       />
+      <Button title="Synced" onPress={() => navigation.navigate('download')} />
       <Button title='Search' onPress={handleSearch} />
       {results.map((item, index) => (
          <View key={index} style={styles.resultContainer}>
@@ -53,9 +54,9 @@ const YTSearch = () => {
             <TouchableOpacity onPress={() => setYoutubeUrl(`https://www.youtube.com/watch?v=${item.id.videoId}`)}>
                <Text>{item.snippet.title}</Text>
             </TouchableOpacity>
-            {/* <TouchableOpacity onPress={() => copyToClipboard(`https://www.youtube.com/watch?v=${item.id.videoId}`)}>
+            <TouchableOpacity onPress={() => copyToClipboard(`https://www.youtube.com/watch?v=${item.id.videoId}`)}>
                <Text>Copy Link</Text>
-            </TouchableOpacity> */}
+            </TouchableOpacity>
          </View>
       ))}
       {youtubeUrl && (

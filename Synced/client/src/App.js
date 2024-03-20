@@ -6,6 +6,7 @@ import LoginForm from './components/login-form/loginForm';
 import RegisterForm from './components/register-form/registerForm';
 import HomeScreen from './components/home-screen/homeScreen';
 import YTSearch from './components/YT-Search/YTSearch';
+import Download from './components/download/download';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,6 +18,7 @@ export default function App() {
       <Stack.Screen name="Login" component={LoginForm} />
       <Stack.Screen name="Register" component={RegisterForm} />
       <Stack.Screen name="YTSearch" component={YTSearch} />
+      <Stack.Screen name="download" component={Download} />
       </Stack.Navigator>
    </NavigationContainer>
   );
