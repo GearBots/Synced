@@ -9,20 +9,22 @@ from models import db, User
 from dotenv import load_dotenv
 from downloadYT import download_yt
 from pytube.exceptions import RegexMatchError, PytubeError
+import logging 
 
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///database.db')
 db.init_app(app) 
 migrate = Migrate(app, db) 
-CORS(app, resources={r"/*": {"origins": "*"}})
 api = Api(app)
-
-download_location = os.getenv('DOWNLOAD_LOCATION', './downloads')
-if not os.path.exists(download_location):
-    os.makedirs(download_location)
-app.config['DOWNLOAD_LOCATION'] = os.path.abspath(download_location)
+CORS(app, resources={r"/*": {"origins": "*"}})
+logging.basicConfig(level=logging.INFO)
+# download_location = os.getenv('DOWNLOAD_LOCATION', '/downloads')
+# if not os.path.exists(download_location):
+#     os.makedirs(download_location)
+# app.config['DOWNLOAD_LOCATION'] = os.path.abspath(download_location)
 
 class CheckSession(Resource):
     def get(self):
@@ -44,11 +46,12 @@ class Login(Resource):
     def post(self):
         data = request.get_json()
         user = User.query.filter_by(username=data.get('username')).first()
-        if user and bcrypt.check_password_hash(user.password, data.get('password')):
-            session['user_id'] = user.id
-            return jsonify({'message': 'Login Successful', 'user': user.username})
+        if user and bcrypt.checkpw(data.get('password').encode('utf-8'), user.password):
+            session['user_id'] = user.user_id
+            return ({'message': 'Login Successful', 'user': user.username}), 201
         else:
-            return jsonify({'error': 'Login Failed'}), 401
+            app.logger.info(f"Login attempt failed for {data.get('username')}")
+            return {'error': 'Login Failed'}, 401
 api.add_resource(Login, '/login') 
 
 class Logout(Resource):
@@ -62,12 +65,16 @@ class Register(Resource):
         data = request.get_json()
         user = User.query.filter_by(username=data['username']).first()
         if user:
-            return jsonify({'error': 'User already exists'}), 400
-        hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+            return {'error': 'User already exists'}, 400
+        password = data['password'].encode('utf-8')
+        salt = bcrypt.gensalt()
+        hashed_password = bcrypt.hashpw(password, salt)
         new_user = User(username=data['username'], password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({'message': 'User created'}), 201
+        return {'message': 'User created'}, 201
+
+
 api.add_resource(Register, '/register')
 
 class DoubleTrouble(Resource):
@@ -78,7 +85,7 @@ class DoubleTrouble(Resource):
 
         if video_url:
             try:
-                file_path = download_yt(video_url, app.config['DOWNLOAD_LOCATION'], download_audio=download_audio)
+                file_path = download_yt(video_url, download_audio=download_audio)
                 filename = os.path.basename(file_path)
                 return jsonify({'filename': filename}), 200
             except RegexMatchError:
@@ -91,7 +98,7 @@ api.add_resource(DoubleTrouble, '/doubleTrouble')
 class DownloadFile(Resource):
     def get(self, filename):
         try:
-            return send_from_directory(app.config['DOWNLOAD_LOCATION'], filename, as_attachment=True)
+            return send_from_directory(filename, as_attachment=True)
         except FileNotFoundError:
             return jsonify({'error': 'File not found'}), 404
 api.add_resource(DownloadFile, '/download/<filename>')

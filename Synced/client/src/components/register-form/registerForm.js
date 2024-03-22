@@ -17,7 +17,7 @@ const RegisterForm = () => {
         }
 
         try {
-            const response = await fetch('http://10.0.3.171:3000/register', {
+            const response = await fetch('http://127.0.0.1:5000/register', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -34,7 +34,7 @@ const RegisterForm = () => {
 
             const data = await response.json();
             console.log(data);
-            navigation.navigate('HomeScreen');
+            navigation.navigate('Home');
         } catch (error) {
             console.error('Error:', error);
             setError("Could not create user, please try again");

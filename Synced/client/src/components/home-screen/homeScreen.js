@@ -1,7 +1,7 @@
 // HomeScreen.js
 import React from 'react';
 import { View, Button, StyleSheet } from 'react-native';
-
+import { withExpoSnack } from 'nativewind';
 const HomeScreen = ({ navigation }) => {
  return (
     <View style={styles.container}>
@@ -14,6 +14,7 @@ const HomeScreen = ({ navigation }) => {
         onPress={() => navigation.navigate('Register')}
       />
       <Button title="YT Search" onPress={() => navigation.navigate('YTSearch')} />
+      <Button title ="Community" onPress={() => navigation.navigate('Community')} />
     </View>
  );
 };
@@ -23,6 +24,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#1c1919',
  },
 });
 

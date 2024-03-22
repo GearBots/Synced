@@ -1,43 +1,48 @@
 import React, { useEffect, useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Alert, Text, TouchableOpacity} from 'react-native';
+import { View, TextInput, Button, StyleSheet, Alert, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-
 
 const LoginScreen = () => {
  const [username, setUsername] = useState('');
  const [password, setPassword] = useState('');
+ const navigator = useNavigation();
 
-
- const handleLogin = async (e) => {
-    e.preventDefault()
-    console.log('Username', username)
-    console.log('Passeword', password)
+ const handleLogin = async () => {
     try {
-        const response = await fetch('/login', {
-            method: 'POST',
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, password })
-        })
-        if (!response.ok){
-            throw new Error(`Error: ${response.status}`)
-        }
-        const user = await response.json()
-        console.log('Login Success', user)
-        setUsername(user.user)
-        navigator.navagate('Home')
-    } catch(error) {
-        console.error(error.message)
-        alert('Invalid Username or Password')
+      const response = await fetch('http://127.0.0.1:5000/login', {
+        method: 'POST',
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password })
+      });
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      const user = await response.json();
+      console.log('Login Success', user);
+      setUsername(user.user);
+      navigator.navigate('Home');
+    } catch (error) {
+      console.error(error.message);
+      Alert.alert('Invalid Username or Password');
     }
-    useEffect(()=>{
-        fetch('/check_session').then((response) => {
-            if (response.ok) {
-                setUsername(user)
-                response.json().then((data) => handleLogin(data.username, data.password))
-            }
-        })
-    })
  };
+
+ const handleCreateUser = () => {
+    navigator.navigate('Register');
+ };
+
+//  useEffect(() => {
+//     fetch('/check_session').then((response) => {
+//       if (response.ok) {
+//         response.json().then((data) => {
+//           setUsername(data.username);
+//           navigator.navigate('Home');
+//         });
+//       }
+//     }).catch((error) => {
+//       console.error('Session check failed:', error);
+//     });
+//  }, []);
 
  return (
     <View style={styles.container}>
@@ -64,8 +69,8 @@ const LoginScreen = () => {
       </View>
       <View style={styles.rememberMeForget}>
         <Text>Remember Me</Text>
-        <TouchableOpacity onPress={handleCreateUser}>
-          <Text>Forget Password</Text>
+        <TouchableOpacity onPress={handleCreateUser} style={styles.forgetPassword}>
+          <Text style={styles.forgetPasswordText}>Forget Password</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.register}>
@@ -87,6 +92,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: 10,
     paddingLeft: 10,
+ },
+ forgetPassword: {
+    marginTop: 10,
+ },
+ forgetPasswordText: {
+    color: 'blue',
+ },
+ link: {
+    color: 'blue',
  },
 });
 
