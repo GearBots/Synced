@@ -21,11 +21,12 @@ class User(db.Model):
 
 class Track(db.Model):
     __tablename__ = 'tracks'
-    title = Column(String, nullable=False)
     track_id = Column(Integer, primary_key=True)
-    genre = Column(String)
-    photo = Column(String)
-    url = Column(String)
+    title = Column(String, nullable=False)
+    artist = Column(String, nullable=False)
+    genre = Column(String, nullable=False)
+    photo = Column(String, nullable=True)
+    url = Column(String, nullable=True)
     
     saved_by = relationship("SavedTrack", back_populates="track")
     community = relationship("Community", back_populates="track")

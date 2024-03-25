@@ -5,6 +5,10 @@ import * as FileSystem from 'expo-file-system';
 const Downloader = () => {
  const [url, setUrl] = useState('');
  const [downloadPath, setDownloadPath] = useState('');
+ const [title, setTitle] = useState('');
+ const [artist, setArtist] = useState('');
+ const [genre, setGenre] = useState('');
+
 
  const downloadAudio = async () => {
     if (!url) {
@@ -29,6 +33,35 @@ const Downloader = () => {
       Alert.alert('Error', 'Failed to download file');
     }
  };
+ const handleDownload = async () => {
+   if (!url || !title || !artist || !genre) {
+     Alert.alert('Error', 'Please fill out all');
+     return;
+   }
+   try {
+    const response = await fetch('http://127.0.0.1:5000/tracks', {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ 
+        url: url,
+        title: title,
+        artist: artist,
+        genre: genre,
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const responseData = await response.json();
+    console.log(responseData);
+    Alert.alert('Success', 'Track information sent successfully');
+  } catch (error) {
+    console.error('Error:', error);
+    Alert.alert('Error', 'Failed to send track information');
+  }
+};
 
  return (
     <View style={styles.container}>
@@ -38,7 +71,26 @@ const Downloader = () => {
         onChangeText={setUrl}
         value={url}
       />
-      <Button title="Download Audio" onPress={downloadAudio} />
+      <TextInput 
+        style={styles.input}
+        placeholder="Artist Name"
+        onChangeText={setArtist}
+        value={artist}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Track Name"
+        onChangeText={setTitle}
+        value={title}
+      />
+      <TextInput 
+        style={styles.input}
+        placeholder="Genre"
+        onChangeText={setGenre}
+        value={genre}
+      />
+      <Button title="Save" onPress={handleDownload} />
+      <Button title="Download Audio" onPress={downloadAudio}  />
       {downloadPath && <Text>Downloaded to: {downloadPath}</Text>}
     </View>
  );

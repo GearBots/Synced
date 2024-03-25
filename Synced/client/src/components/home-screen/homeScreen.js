@@ -1,10 +1,11 @@
 // HomeScreen.js
 import React from 'react';
-import { View, Button, StyleSheet } from 'react-native';
-import { withExpoSnack } from 'nativewind';
+import { View, Button, StyleSheet, Text, ImageBackground} from 'react-native';
 const HomeScreen = ({ navigation }) => {
  return (
+    <ImageBackground source={require('../../../../assets/synced.png')} style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
     <View style={styles.container}>
+      <Text style={styles.title}>Synced</Text>
       <Button
         title="Login"
         onPress={() => navigation.navigate('Login')}
@@ -16,6 +17,7 @@ const HomeScreen = ({ navigation }) => {
       <Button title="YT Search" onPress={() => navigation.navigate('YTSearch')} />
       <Button title ="Community" onPress={() => navigation.navigate('Community')} />
     </View>
+    </ImageBackground>
  );
 };
 
@@ -24,8 +26,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1c1919',
+    // backgroundColor: '#1c1919',
  },
+ title: {
+  fontSize: 70,
+  color: 'yellow',
+  fontWeight: 'bold',
+  marginBottom: 20,
+ }
 });
 
 export default HomeScreen;
