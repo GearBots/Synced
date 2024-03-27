@@ -5,7 +5,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api, Resource
 from flask_cors import CORS
 from flask_migrate import Migrate
-from models import Track, db, User 
+from models import Community, Track, db, User, SavedTrack
 from dotenv import load_dotenv
 from downloadYT import download_yt
 from pytube.exceptions import RegexMatchError, PytubeError
@@ -30,7 +30,7 @@ class CheckSession(Resource):
     def get(self):
         user_id = session.get('user_id')
         if user_id:
-            user = User.query.filter_by(User.id == user_id).first()
+            user = User.query.filter_by(user_id=user_id).first()
             return user.to_dict()
         return {}, 401
 
@@ -130,37 +130,85 @@ class Tracks(Resource):
         )
         db.session.add(new_track)
         db.session.commit()
+        print(new_track.to_dict())
+        return new_track.to_dict(), 201
 api.add_resource(Tracks, '/tracks')
 
 class CreatePost(Resource):
     def post(self):
         data = request.get_json()
+        user_id = data.get("user_id")
+        track_id = data.get("track_id")
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-        new_post = Track(
-            title=data['title'],
-            artist=data['artist'],
-            genre=data['genre'],
-            photo=data.get('photo', None),
-            url=data.get('url', None),
-        )
-        db.session.add(new_post)
-        db.session.commit()
-        return {'message': 'Post created'}, 201
-api.add_resource(CreatePost, '/create_post')
-
-class SavedTracks(Resource):
-    def get(self):
-        user_id = session.get('user_id')
         if user_id:
             user = User.query.filter_by(user_id=user_id).first()
             if user:
-                saved_tracks = [track.to_dict() for track in user.saved_tracks]
-                return saved_tracks, 200
+                comments = data.get('comments')
+                photo = data.get('photo', None)
+                new_post = Community( 
+                    comments=comments,
+                    # photo=photo,
+                    user_id=user_id,
+                    track_id=track_id,
+                )
+                print(new_post.to_dict())
+                db.session.add(new_post)
+                db.session.commit()
+                return new_post.to_dict(), 201
+api.add_resource(CreatePost, '/create_post')
+
+class GetPosts(Resource):
+    def get(self):
+        posts = Community.query.all()
+        posts_data = []
+        for post in posts:
+            posts_data.append(post.to_dict())
+        return posts_data, 200
+api.add_resource(GetPosts, '/get_posts')
+
+class SavedTracks(Resource):
+    def post(self):
+        data = request.get_json()
+        user_id = data.get("user_id")
+        track_id = data.get("track_id")
+        print(track_id)
+        if user_id:
+            user = User.query.filter_by(user_id=user_id).first()
+            print(user)
+            if user:
+                saved_tracks = SavedTrack(user_id=user_id, track_id =track_id)
+                db.session.add(saved_tracks)
+                db.session.commit()
+                return {'message': 'Track saved successfully'}, 201
             else:
                 return {'error': 'User not found'}, 404
         else:
             return {'error': 'User not logged in'}, 401
 api.add_resource(SavedTracks, '/saved_tracks')
+
+class GetSavedTracks(Resource):
+    def get(self):
+        user_id = session.get('user_id')
+
+        if user_id:
+            user = User.query.filter_by(user_id=user_id).first()
+            if user:
+                saved_tracks_entries = SavedTrack.query.filter_by(user_id=user_id).all()
+                saved_tracks_data = []
+                for entry in saved_tracks_entries:
+                    track = Track.query.filter_by(track_id=entry.track_id).first()
+                    if track:
+                        saved_tracks_data.append(track_to_dict(track))
+                return {'saved_tracks': saved_tracks_data}, 200
+            else:
+                return {'error': 'User not found'}, 404
+        else:
+            return {'error': 'User not logged in'}, 401
+
+
+api.add_resource(GetSavedTracks, '/get_saved_tracks')
+
+
 if __name__ == '__main__':
     app.run(debug=True)

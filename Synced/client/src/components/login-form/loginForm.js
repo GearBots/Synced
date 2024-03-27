@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { useUser } from '../../components/user-stay/user';
 
 const LoginScreen = () => {
  const [username, setUsername] = useState('');
  const [password, setPassword] = useState('');
+ const {setUser} = useUser()
  const navigator = useNavigation();
 
  const handleLogin = async () => {
@@ -25,6 +27,7 @@ const LoginScreen = () => {
       console.error(error.message);
       Alert.alert('Invalid Username or Password');
     }
+    setUser({username: username, password: password})
  };
 
  const handleCreateUser = () => {

@@ -9,22 +9,25 @@ import YTSearch from './components/YT-Search/YTSearch';
 import Download from './components/download/download';
 import Community from './components/community/community';
 import CreatePost from './components/create-post/createPost';
+import { UserProvider } from './components/user-stay/user';
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-   <NavigationContainer> 
-    <Stack.Navigator>
-      <Stack.Screen name='Home' component={HomeScreen} />
-      <Stack.Screen name="Login" component={LoginForm} />
-      <Stack.Screen name="Register" component={RegisterForm} />
-      <Stack.Screen name="YTSearch" component={YTSearch} />
-      <Stack.Screen name="download" component={Download} />
-      <Stack.Screen name="Community" component={Community} />
-      <Stack.Screen name="CreatePost" component={CreatePost} />
-      </Stack.Navigator>
-   </NavigationContainer>
+    <UserProvider>
+      <NavigationContainer> 
+        <Stack.Navigator>
+          <Stack.Screen name='Home' component={HomeScreen} />
+          <Stack.Screen name="Login" component={LoginForm} />
+          <Stack.Screen name="Register" component={RegisterForm} />
+          <Stack.Screen name="YTSearch" component={YTSearch} />
+          <Stack.Screen name="download" component={Download} />
+          <Stack.Screen name="Community" component={Community} />
+          <Stack.Screen name="CreatePost" component={CreatePost} />
+        </Stack.Navigator>
+      </NavigationContainer>
+   </UserProvider>
   );
 }
 
