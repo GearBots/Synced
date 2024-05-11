@@ -64,7 +64,7 @@ const RegisterForm = () => {
                 onChangeText={(text) => setVerifyPassword(text)}
                 
             />
-            <Button title='Create Account' onPress={handleCreateUser} />
+            <Button style={styles.button} title='Create Account' onPress={handleCreateUser} />
             {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
     );
@@ -72,19 +72,32 @@ const RegisterForm = () => {
 
 const styles = StyleSheet.create({
     registerForm: {
-        padding: 20,
+        flex: 1,
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+        backgroundColor: 'teal',
     },
     inputField: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: 'white',
         borderWidth: 1,
         marginBottom: 10,
         paddingLeft: 10,
+        backgroundColor: '#FFFFFF',
+        color: 'black',
     },
     errorText: {
         color: 'red',
         marginTop: 10,
     },
+    button: {
+        backgroundColor: 'black',
+        color: 'white',
+        padding: 10,
+        fontSize: 20,
+
+
+    }
 });
 
 export default RegisterForm;

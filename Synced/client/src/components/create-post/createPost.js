@@ -10,11 +10,27 @@ const CreatePost = () => {
     const [selectedTrack, setSelectedTrack] = useState(null);
     const [savedTracks, setSavedTracks] = useState([]);
     const [comment, setComment] = useState('');
-    const { user, setUser } = useUser();
-
-    useEffect(() => {
+    const {user, setUser} = useUser();
+     
+  useEffect(() => {
+    const checkSession = async () => {
+      try {
         fetchSavedTracks();
-    }, []);
+        const response = await fetch('http://127.0.0.1:5000/check_session');
+        if (response.ok) {
+          const data = await response.json();
+          setUser(data); 
+        } else {
+          setUser(null);  
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+        setUser(null); 
+      }
+    };
+
+    checkSession();
+ }, [setUser]);
 
     const fetchSavedTracks = async () => {
         try {
@@ -60,8 +76,8 @@ const CreatePost = () => {
                 method: 'POST',
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ 
-                    // photo: photo,
-                    track: track,
+                    photo: photo,
+                    // track: track,
                     comment: comment,
                     track_id: selectedTrack,
                     user_id: user.user_id
@@ -81,8 +97,8 @@ const CreatePost = () => {
     return (
         <View style={styles.container}>
             <Text style={styles.title}>Create Post</Text>
-            {/* <Button title="Select Photo" onPress={selectPhoto} />
-            {photo && <Image source={{ uri: photo }} style={styles.image} />} */}
+            <Button title="Select Photo" onPress={selectPhoto} />
+            {photo && <Image source={{ uri: photo }} style={styles.image} />}
             <TextInput
                 style={styles.input}
                 onChangeText={setComment}

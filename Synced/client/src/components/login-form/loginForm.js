@@ -49,6 +49,7 @@ const LoginScreen = () => {
 
  return (
     <View style={styles.container}>
+      <Text style={styles.title2}>Ready to Sail?</Text>
       <Text style={styles.title}>Login</Text>
       <View style={styles.inputField}>
         <TextInput
@@ -67,13 +68,10 @@ const LoginScreen = () => {
           secureTextEntry
         />
       </View>
-      <View style={styles.inputField}>
-        <Button title='Login' onPress={handleLogin} />
-      </View>
-      <View style={styles.rememberMeForget}>
-        <Text>Remember Me</Text>
-        <TouchableOpacity onPress={handleCreateUser} style={styles.forgetPassword}>
-          <Text style={styles.forgetPasswordText}>Forget Password</Text>
+
+      <View style={styles.link}>
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginButtonText}>Login</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.register}>
@@ -84,27 +82,54 @@ const LoginScreen = () => {
 };
 
 const styles = StyleSheet.create({
- container: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 20,
+  container: {
+     flex: 1,
+     justifyContent: 'center',
+     paddingHorizontal: 20,
+     backgroundColor: 'teal', // Matte black background
+  },
+  title: {
+     fontSize: 24,
+     fontWeight: 'bold',
+     textAlign: 'center',
+     color: '#FFFFFF', // White text for better contrast
+     marginBottom: 20,
+  },
+  title2: {
+    fontSize: 35,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#FFFFFF', // White text for better contrast
+    marginBottom: 20,
+  },
+  input: {
+     height: 40,
+     borderColor: 'gray',
+     borderWidth: 1,
+     marginBottom: 10,
+     paddingLeft: 10,
+     backgroundColor: '#FFFFFF', // White input fields for better contrast
+     color: '#000000', // Black text for input fields
+  },
+  forgetPassword: {
+     marginTop: 10,
+  },
+  forgetPasswordText: {
+     color: 'green',
+  },
+  link: {
+     color: 'darkblue',
+  },
+  loginButton: {
+    alignItems: 'center',
+    backgroundColor: 'grey',
+    padding: 10,
+    borderRadius: 5,
  },
- input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingLeft: 10,
+ loginButtonText: {
+    color: '#FFFFFF', // Text color
+    fontSize: 16,
  },
- forgetPassword: {
-    marginTop: 10,
- },
- forgetPasswordText: {
-    color: 'blue',
- },
- link: {
-    color: 'blue',
- },
-});
-
-export default LoginScreen;
+ });
+ 
+ export default LoginScreen;

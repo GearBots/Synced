@@ -109,7 +109,6 @@ def track_to_dict(track):
         'title': track.title,
         'artist': track.artist,
         'genre': track.genre,
-        'photo': track.photo,
         'url': track.url
     }
 
@@ -125,7 +124,6 @@ class Tracks(Resource):
             title=data['title'],
             artist=data['artist'],
             genre=data['genre'],
-            photo=data.get('photo', None),
             url=data.get('url', None),
         )
         db.session.add(new_track)
@@ -138,14 +136,16 @@ class CreatePost(Resource):
     def post(self):
         data = request.get_json()
         user_id = data.get("user_id")
+        print(user_id)
         track_id = data.get("track_id")
         if not data:
             return jsonify({'error': 'No data provided'}), 400
         if user_id:
             user = User.query.filter_by(user_id=user_id).first()
             if user:
-                comments = data.get('comments')
+                comments = data.get('comment')
                 photo = data.get('photo', None)
+                print(comments)
                 new_post = Community( 
                     comments=comments,
                     # photo=photo,
@@ -163,8 +163,28 @@ class GetPosts(Resource):
         posts = Community.query.all()
         posts_data = []
         for post in posts:
-            posts_data.append(post.to_dict())
+
+            user = User.query.filter_by(user_id=post.user_id).first()
+            username = user.username
+
+            track = Track.query.filter_by(track_id=post.track_id).first()
+            print(post.to_dict())
+            print(post.track_id)
+            print(track)
+            artist = track.artist if track else None
+            title = track.title if track else None
+
+            post_dict = post.to_dict()
+            post_dict['username'] = username
+            post_dict['artist'] = artist
+            post_dict['title'] = title
+
+            # Append the updated post dictionary to posts_data
+            posts_data.append(post_dict)
+
         return posts_data, 200
+
+
 api.add_resource(GetPosts, '/get_posts')
 
 class SavedTracks(Resource):
@@ -208,6 +228,47 @@ class GetSavedTracks(Resource):
 
 
 api.add_resource(GetSavedTracks, '/get_saved_tracks')
+
+class DeletePost(Resource):
+    def delete(self, post_id):
+        post = Community.query.filter_by(community_id=post_id).first()
+        if post:
+            db.session.delete(post)
+            db.session.commit()
+            return {'message': 'Post deleted successfully'}, 200
+        else:
+            return {'error': 'Post not found'}, 404
+api.add_resource(DeletePost, '/delete_post/<int:post_id>')
+
+
+class UpdateComment(Resource):
+    def patch(self, post_id):
+        data = request.get_json()
+        post = Community.query.filter_by(community_id=post_id).first()
+        if post:
+            post.comments = data['comment']
+            db.session.commit()
+            return {'message': 'Comment updated successfully'}, 200
+        else:
+            return {'error': 'Post not found'}, 404
+api.add_resource(UpdateComment, '/update_comment/<int:post_id>')
+
+
+class gather(Resource):
+    def post(self, index):
+        post = self.head
+        trail = self.head
+        post = post.next
+        if trail < 0 or self.length < index:
+            return None
+        else:
+            for _ in range(index):
+                post = post.next 
+                trail = post
+            return trail.next
+        
+
+
 
 
 if __name__ == '__main__':

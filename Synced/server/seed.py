@@ -13,41 +13,35 @@ with app.app_context():
     Session = sessionmaker(bind=db.engine)
     session = Session()
 
+def seed_data():
+    # Initialize Faker
+    fake = Faker()
 
-    def create_fake_data(num_users=10, num_tracks=20, num_saved_tracks=50, num_communities=100):
-        try:
-            # Create fake users
-            # for _ in range(num_users):
-            #     user = User(username=fake.user_name(), password=PasswordType.hash(fake.password()))
-            #     session.add(user)
-            
-            # Create fake tracks
-            # for _ in range(num_tracks):
-            #     track = Track(title=fake.sentence(), genre=fake.word(), photo=fake.image_url(), url=fake.url())
-            #     session.add(track)
-            
-            # Create fake saved tracks
-            # for _ in range(num_saved_tracks):
-            #     user = session.query(User).order_by(func.random()).first() # Get a random user
-            #     track = session.query(Track).order_by(func.random()).first() # Get a random track
-            #     saved_track = SavedTrack(user_id=user.user_id, track_id=track.track_id)
-            #     session.add(saved_track)
-            save_track = SavedTrack(user_id=10, track_id=10)
-            session.add(save_track)
-            
-            # Create fake communities
-            for _ in range(num_communities):
-                user = session.query(User).order_by(func.random()).first() # Get a random user
-                track = session.query(Track).order_by(func.random()).first() # Get a random track
-                community = Community(user_id=user.user_id, track_id=track.track_id, comments=fake.text())
-                session.add(community)
-            
-            # Commit the changes to the database
-            session.commit()
-            print("Fake data created successfully.")
-        except Exception as e:
-            session.rollback()
-            print(f"Error creating fake data: {e}")
+    # Create users
+    for _ in range(10): # Generate 10 users
+        user = User(username=fake.user_name(), password=fake.password())
+        db.session.add(user)
 
-if __name__ == "__main__":
-    create_fake_data()
+    # Create tracks
+    for _ in range(10): # Generate 20 tracks
+        track = Track(title=fake.sentence(), artist=fake.name(), genre=fake.word(), url=fake.url())
+        db.session.add(track)
+
+    # Create saved tracks
+    users = User.query.all()
+    tracks = Track.query.all()
+    for user in users:
+        for track in tracks:
+            if fake.boolean(chance_of_getting_true=50): # 50% chance to save a track
+                saved_track = SavedTrack(user_id=user.user_id, track_id=track.track_id)
+                db.session.add(saved_track)
+
+    # Create communities
+    for _ in range(10): # Generate 30 community entries
+        user = fake.random_element(elements=users)
+        track = fake.random_element(elements=tracks)
+        community = Community(comments=fake.sentence(), user_id=user.user_id, track_id=track.track_id, photo=fake.image_url())
+        db.session.add(community)
+
+    # Commit the changes
+    db.session.commit()

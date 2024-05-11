@@ -10,11 +10,11 @@ const HomeScreen = ({ navigation }) => {
         title="Login"
         onPress={() => navigation.navigate('Login')}
       />
-      <Button
+      {/* <Button
         title="Register"
         onPress={() => navigation.navigate('Register')}
-      />
-      <Button title="YT Search" onPress={() => navigation.navigate('YTSearch')} />
+      /> */}
+      <Button title="SET SAIL" onPress={() => navigation.navigate('YTSearch')} />
       <Button title ="Community" onPress={() => navigation.navigate('Community')} />
     </View>
     </ImageBackground>

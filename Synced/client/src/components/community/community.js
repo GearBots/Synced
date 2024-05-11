@@ -1,51 +1,128 @@
-import React from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet, Alert, TextInput, Modal, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import {useState, useEffect} from 'react';
-
 
 const Community = () => {
     const navigation = useNavigation();
     const [posts, setPosts] = useState([]);
-   
+    const [savedPosts, setSavedPosts] = useState([]);
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [newComment, setNewComment] = useState('');
+    
     useEffect(() => {
         fetchPost();
-    }, [])
+    }, []);
+
     const fetchPost = async () => {
         try {
             const response = await fetch('http://127.0.0.1:5000/get_posts');
-            if (!response.ok) {
-                throw new Error('Failed to fetch posts');
-            }
             const responseData = await response.json();
-            setPosts(responseData.posts);
+            setPosts(responseData);
         } catch (error) {
             console.error('Error:', error);
-            Alert.alert('Error', 'Failed to fetch posts');
         }
     };
+
+    const deletePost = async (postId) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/delete_post/${postId}`, {
+                method: 'DELETE',
+            });
+            if (!response.ok) {
+                throw new Error('Failed to delete post');
+            }
+            setPosts(posts.filter(post => post.community_id !== postId));
+        } catch (error) {
+            console.error('Error:', error);
+            Alert.alert('Error', 'Failed to delete post');
+        }
+    };
+
+    const updateComments = async (postId, newComment) => {
+        try {
+            const response = await fetch(`http://127.0.0.1:5000/update_comment/${postId}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ comment: newComment }),
+            });
+            if (!response.ok) {
+                throw new Error('Failed to update comments');
+            }
+            const updatedPost = await response.json();
+            setPosts(posts?.map(post => post.community_id === postId ? updatedPost : post));
+            fetch('http://127.0.0.1:5000/get_posts')
+            .then(res => res.json())
+            .then(setPosts)
+
+        } catch (error) {
+            console.error('Error:', error);
+            Alert.alert('Error', 'Failed to update comments');
+        }
+    };
+
+
+    const showUpdateModal = (post) => {
+        setSelectedPost(post);
+        setModalVisible(true);
+    };
+
     const handleCreatePost = () => {
         navigation.navigate('CreatePost');
-    }
+    };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            {posts.map((post, index) => (
-                <View key={index} style={styles.postContainer}>
-                    {post.comments.map((comment, commentIndex) => (
-                        <Text key={commentIndex} style={styles.commentText}>{comment}</Text>
-                    ))}
-                    {/* {post.photos.map((photoUri, photoIndex) => (
-                        <Image key={photoIndex} source={{ uri: photoUri }} style={styles.photo} />
-                    ))} */}
-                    {post.tracks.map((track, trackIndex) => (
-                        <Text key={trackIndex} style={styles.trackText}>{track.title} by {track.artist}</Text>
-                    ))}
-                </View>
-            ))}
             <TouchableOpacity onPress={handleCreatePost} style={styles.CreatePost}>
                 <Text style={styles.CreatePostText}>Create Post</Text>
             </TouchableOpacity>
+            {posts?.map((post, index) => (
+                <View key={index} style={styles.postContainer}>
+                    <Text style={styles.commentText}>{post.comment}</Text>
+                    {post.photo && <Image source={{ uri: post.photo }} style={styles.photo} />}
+                    <Text style={styles.trackText}>Artist: {post.artist}</Text>
+                    <Text style={styles.trackText}>Track: {post.title}</Text>
+                    <Text style={styles.trackText}>User: {post.username}</Text>
+                    <TouchableOpacity onPress={() => showUpdateModal(post)}>
+                        <Text>Update Comments</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => deletePost(post.community_id)}>
+                        <Text>Delete Post</Text>
+                    </TouchableOpacity>
+                </View>
+            ))}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={modalVisible}
+                onRequestClose={() => {
+                    setModalVisible(!modalVisible);
+                }}
+            >
+                <View style={styles.centeredView}>
+                    <View style={styles.modalView}>
+                        <TextInput
+                            style={styles.input}
+                            onChangeText={(text) => setNewComment(text)}
+                            value={newComment}
+                            placeholder="Enter new comment"
+                        />
+                        <Button
+                            onPress={() => {
+                                updateComments(selectedPost.community_id, newComment);
+                                setModalVisible(!modalVisible);
+                            }}
+                            title="Update Comment"
+                        />
+                        <Button
+                            onPress={() => setModalVisible(!modalVisible)}
+                            title="Cancel"
+                        />
+                    </View>
+                </View>
+            </Modal>
         </ScrollView>
     );
 };
@@ -80,5 +157,33 @@ const styles = StyleSheet.create({
         color: '#FFFFFF',
         fontSize: 16,
     },
+    centeredView: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 22
+    },
+    modalView: {
+        margin: 20,
+        backgroundColor: "white",
+        borderRadius: 20,
+        padding: 35,
+        alignItems: "center",
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 2
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5
+    },
+    input: {
+        height: 40,
+        margin: 12,
+        borderWidth: 1,
+        padding: 10,
+    },
 });
+
 export default Community;

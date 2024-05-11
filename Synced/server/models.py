@@ -31,7 +31,6 @@ class Track(db.Model):
     title = Column(String, nullable=False)
     artist = Column(String, nullable=False)
     genre = Column(String, nullable=False)
-    photo = Column(String, nullable=True)
     url = Column(String, nullable=True)
 
     def to_dict(self):
@@ -69,7 +68,7 @@ class Community(db.Model):
 
     def to_dict(self):
         return {
-            'comments': self.comments,
+            'comment': self.comments,
             'community_id': self.community_id,
             'user_id': self.user_id,
             'track_id': self.track_id,
