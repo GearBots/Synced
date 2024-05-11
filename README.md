@@ -15,13 +15,7 @@ Here're some of the project's best features:
 
 <h2>🛠️ Installation Steps:</h2>
 
-<p>1. Create new virtual environment</p>
-
-```
-pipenv shell
-```
-
-<p>2. Make sure to install all dependencies</p>
+<p>1. Make sure to install all dependencies</p>
 
 ```
 pipenv install
@@ -31,7 +25,7 @@ npm install
 ```
 
 
-<p>4. Start both front and backend!</p>
+<p>2. Start both front and backend!</p>
 ```
 npm install
 ```
@@ -45,6 +39,6 @@ python app.py
 
 Technologies used in the project:
 
-*   SQLAlchemy
-*   Python
-*   Pandas
+*React Native
+*Python
+*
