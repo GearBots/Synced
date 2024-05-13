@@ -9,7 +9,7 @@
 Here're some of the project's best features:
 
 *   User Authentication
-*   Implemented Youtube API ti search for songs 
+*   Implemented Youtube API to search for songs 
 *   Working YouTube to MP3 converter/downloader
 
 
