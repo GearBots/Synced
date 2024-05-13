@@ -18,7 +18,7 @@ Here're some of the project's best features:
 <p>1. Make sure to install all dependencies</p>
 
 ```
-pipenv install
+pip install
 ```
 ```
 npm install
@@ -27,7 +27,7 @@ npm install
 
 <p>2. Start both front and backend!</p>
 ```
-npm install
+npm start
 ```
 ```
 python app.py
@@ -41,4 +41,6 @@ Technologies used in the project:
 
 *React Native
 *Python
-*
+*PyTube
+*Flask
+*MoviePy
