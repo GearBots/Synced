@@ -26,15 +26,15 @@ npm install
 
 
 <p>2. Start both front and backend!</p>
+
+``` 
+python app.py
+```
 ```
 npm start
 ```
-```
-python app.py
-```
 
-  
-  
+
 <h2>💻 Built with</h2>
 
 Technologies used in the project:
